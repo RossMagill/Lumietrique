@@ -15,8 +15,8 @@ public class FlyerMovement : MonoBehaviour, IMovement
     [SerializeField] private InputActionReference changeScene;     // press
 
     [Header("Speed & Acceleration")]
-    public float maxSpeedX = 18f;
-    public float maxSpeedY = 14f;
+    public float maxSpeedX = 35f;
+    public float maxSpeedY = 25f;
     public float acceleration = 60f;    // toward target vel
     public float deceleration = 70f;    // when no input on that axis
 

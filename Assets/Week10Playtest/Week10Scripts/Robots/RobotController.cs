@@ -8,11 +8,13 @@ public class RobotController : MonoBehaviour, IControllable
 
     private IMovement playerMovement;
     private PlayerFocusManager playerFocusManager;
+    private OutlineEffect outlineEffect;
 
     private void Awake()
     {
         playerMovement = GetComponent<IMovement>();
         playerFocusManager = FindAnyObjectByType<PlayerFocusManager>();
+        outlineEffect = GetComponent<OutlineEffect>();
     }
 
     public void TryRejoin()
@@ -69,12 +71,13 @@ public class RobotController : MonoBehaviour, IControllable
     {
         //this.enabled = true;
         playerMovement.EnableMovement();
+        outlineEffect?.EnableOutline();
         Debug.Log($"Robot of type **{robotType}** control activated.");
     }
 
     void IControllable.DeactivateControl()
     {
         playerMovement.DisableMovement();
-        //this.enabled = false;
+        outlineEffect?.DisableOutline();
     }
 }

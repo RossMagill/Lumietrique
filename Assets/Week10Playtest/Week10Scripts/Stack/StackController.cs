@@ -14,12 +14,14 @@ public class StackController : MonoBehaviour, IControllable
     private BoxCollider box;
     private IMovement playerMovement;
     private PlayerFocusManager playerFocusManager;
+    private OutlineEffect outlineEffect;
 
     private void Awake()
     {
         box = GetComponent<BoxCollider>();
         playerMovement = GetComponent<IMovement>();
         playerFocusManager = FindAnyObjectByType<PlayerFocusManager>();
+        outlineEffect = GetComponent<OutlineEffect>();
     }
 
     void Start()
@@ -116,12 +118,14 @@ public class StackController : MonoBehaviour, IControllable
     void IControllable.ActivateControl()
     {
         playerMovement.EnableMovement();
+        outlineEffect?.EnableOutline();
         Debug.Log("StackController ActivateControl called.");
     }
 
     void IControllable.DeactivateControl()
     {
         playerMovement.DisableMovement();
+        outlineEffect?.DisableOutline();
         Debug.Log("StackController DeactivateControl called.");
     }
 }
