@@ -8,13 +8,14 @@ public class RobotController : MonoBehaviour, IControllable
 
     private IMovement playerMovement;
     private PlayerFocusManager playerFocusManager;
-    private OutlineEffect outlineEffect;
+
+    [SerializeField]
+    private Renderer indicatorRenderer;
 
     private void Awake()
     {
         playerMovement = GetComponent<IMovement>();
         playerFocusManager = FindAnyObjectByType<PlayerFocusManager>();
-        outlineEffect = GetComponent<OutlineEffect>();
     }
 
     public void TryRejoin()
@@ -61,9 +62,25 @@ public class RobotController : MonoBehaviour, IControllable
             StackController targetStack = finalHit.collider.GetComponentInParent<StackController>();
             Debug.Log($"Found stack to rejoin: {targetStack?.gameObject.name}");
             if (targetStack != null)
-            {   
+            {
                 targetStack.RejoinStack(this.gameObject);
             }
+        }
+    }
+    
+    public void EnableVisual()
+    {
+        if (indicatorRenderer != null)
+        {
+            indicatorRenderer.enabled = true;
+        }
+    }
+
+    public void DisableVisual()
+    {
+        if (indicatorRenderer != null)
+        {
+            indicatorRenderer.enabled = false;
         }
     }
     
@@ -71,13 +88,13 @@ public class RobotController : MonoBehaviour, IControllable
     {
         //this.enabled = true;
         playerMovement.EnableMovement();
-        outlineEffect?.EnableOutline();
+        EnableVisual();
         Debug.Log($"Robot of type **{robotType}** control activated.");
     }
 
     void IControllable.DeactivateControl()
     {
         playerMovement.DisableMovement();
-        outlineEffect?.DisableOutline();
+        DisableVisual();
     }
 }
