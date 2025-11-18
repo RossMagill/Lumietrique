@@ -61,8 +61,50 @@ public class StackController : MonoBehaviour, IControllable
     public void HandleStackInputLogic()
     {
         // Try to stack
+        float searchDistance = 1f;
+        float halfWidth = transform.localScale.x / 2f;
+        Vector3 centreOrigin = transform.position;
+        Vector3 rightOrigin = transform.position + transform.right * halfWidth;
+        Vector3 leftOrigin = transform.position - transform.right * halfWidth;
 
-        PopStack();
+        RaycastHit centreHit, rightHit, leftHit, finalHit;
+
+        bool centreHitSuccess = Physics.Raycast(centreOrigin, Vector3.down, out centreHit, searchDistance);
+        bool rightHitSuccess = Physics.Raycast(rightOrigin, Vector3.down, out rightHit, searchDistance);
+        bool leftHitSuccess = Physics.Raycast(leftOrigin, Vector3.down, out leftHit, searchDistance);
+        Debug.Log($"Raycast results - Centre: {centreHitSuccess}, Right: {rightHitSuccess}, Left: {leftHitSuccess}");
+
+        bool foundTarget = false;
+
+        if (centreHitSuccess)
+        {
+            finalHit = centreHit;
+            foundTarget = true;
+        }
+        else if (rightHitSuccess)
+        {
+            finalHit = rightHit;
+            foundTarget = true;
+        }
+        else if (leftHitSuccess)
+        {
+            finalHit = leftHit;
+            foundTarget = true;
+        }
+        
+        if (!foundTarget)
+        {
+            PopStack();;
+        } else
+        {
+            JoinStack();
+        }
+    }
+
+    public void JoinStack()
+    {
+        // Handle stacking on individual robot
+        // Handle stacking on stack controller
     }
 
     public void PopStack()
