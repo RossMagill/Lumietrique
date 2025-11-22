@@ -62,7 +62,7 @@ public class FlyerMovement : MonoBehaviour, IMovement
         rb = GetComponent<Rigidbody>();
         box = GetComponent<BoxCollider>();
 
-        rb.useGravity = false; // we handle our own lightweight gravity
+        //rb.useGravity = false; // we handle our own lightweight gravity
         rb.constraints = RigidbodyConstraints.FreezePositionZ |
                          RigidbodyConstraints.FreezeRotationX |
                          RigidbodyConstraints.FreezeRotationY |

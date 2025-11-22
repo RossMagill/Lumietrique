@@ -19,6 +19,7 @@ public class PlayerFocusManager : MonoBehaviour
         if (controllables.Count > 0)
         {
             currentFocus = controllables[0];
+            SetFocus(currentFocus);
         }
         else
         {
@@ -91,20 +92,20 @@ public class PlayerFocusManager : MonoBehaviour
             return;
         }
 
-        RobotController robotController = currentFocus.GetComponent<RobotController>();
+        // RobotController robotController = currentFocus.GetComponent<RobotController>();
 
-        if (robotController != null && !currentFocus.GetComponent<StackController>())
-        {
-            GameObject previousFocus = currentFocus;
-            robotController.TryRejoin();
+        // if (robotController != null && !currentFocus.GetComponent<StackController>())
+        // {
+        //     GameObject previousFocus = currentFocus;
+        //     robotController.TryRejoin();
 
-            if (previousFocus != currentFocus)
-            {
-                return;
-            }
-        }
+        //     if (previousFocus != currentFocus)
+        //     {
+        //         return;
+        //     }
+        // }
 
-        StackController stackController = currentFocus.GetComponent<StackController>();
+        NewStackController stackController = currentFocus.GetComponent<NewStackController>();
 
         if (stackController != null)
         {
