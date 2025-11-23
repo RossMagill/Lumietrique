@@ -533,6 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotController
   robotType: Flyer
+  indicatorRenderer: {fileID: 0}
 --- !u!65 &75112725
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -659,6 +660,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotController
   robotType: Runner
+  indicatorRenderer: {fileID: 0}
 --- !u!65 &498523174
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -843,6 +845,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotController
   robotType: Jumper
+  indicatorRenderer: {fileID: 0}
 --- !u!65 &607460027
 BoxCollider:
   m_ObjectHideFlags: 0

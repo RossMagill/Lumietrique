@@ -1,12 +1,19 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor.Callbacks;
 
 public class NewStackController : MonoBehaviour, IControllable
 {
     [Header("Stack Base")]
     [SerializeField]
     private List<GameObject> stack = new();
+
+    [Header("Player Control Indicator")]
+    [SerializeField]
+    private GameObject thunder;
+
+    [Header("Visual Effects")]
+    [SerializeField] private GameObject stackConnectVFX; 
+    [SerializeField] private GameObject stackPopVFX;
 
     private GameObject stackBasePrefab;
 
@@ -49,6 +56,8 @@ public class NewStackController : MonoBehaviour, IControllable
         flyerMovement = GetComponent<FlyerMovement>();
         jumperMovement = GetComponent<JumperMovement>();
         runnerMovement = GetComponent<RunnerMovement>();
+
+        if (thunder != null) thunder.SetActive(false);
     }
 
     void Start()
@@ -58,6 +67,7 @@ public class NewStackController : MonoBehaviour, IControllable
             rb.useGravity = true;
             CalculateCollider();
             CalculateTriggerCollider();
+            SetThunderPosition();
         }
     }
 
@@ -145,10 +155,15 @@ public class NewStackController : MonoBehaviour, IControllable
         if (stack.Count > 1)
         {
             GameObject topRobot = stack[^1];
+            float halfHeight = topRobot.transform.localScale.y / 2f;
+            Vector3 feetPosition = topRobot.transform.position - (topRobot.transform.up * halfHeight);
+            
+            SpawnVFX(stackPopVFX, feetPosition, this.transform);
             GameObject newStackBase = Instantiate(stackBasePrefab, topRobot.transform.position, Quaternion.identity);
             stack.RemoveAt(stack.Count - 1);
             CalculateCollider();
             CalculateTriggerCollider();
+            SetThunderPosition();
             NewStackController newStackController = newStackBase.GetComponent<NewStackController>();
             newStackController.RegisterRobotToStack(topRobot);
             playerFocusManager.RegisterControllable(newStackBase);
@@ -166,6 +181,8 @@ public class NewStackController : MonoBehaviour, IControllable
             targetStackController.RegisterRobotToStack(robotModel); 
         }
 
+        //targetStackController.SetThunderPosition();
+
         this.stack.Clear();
         
         playerFocusManager.DeregisterControllable(this.gameObject, targetStack);
@@ -175,7 +192,7 @@ public class NewStackController : MonoBehaviour, IControllable
 
     public void RegisterRobotToStack(GameObject robot)
     {
-        float baseHeight = GetStackHeight();
+        // float baseHeight = GetStackHeight();
         //float robotHeight = robot.transform.localScale.y;
 
         robot.transform.SetParent(this.transform);
@@ -192,11 +209,39 @@ public class NewStackController : MonoBehaviour, IControllable
             float newHalfHeight = robot.transform.localScale.y / 2f;
 
             robot.transform.localPosition = new Vector3(0, prevY + prevHalfHeight + newHalfHeight, 0);
+
+            Vector3 contactPoint = robot.transform.position - (robot.transform.up * newHalfHeight);
+            SpawnVFX(stackConnectVFX, contactPoint, this.transform);
         }
 
         stack.Add(robot);
         CalculateCollider();
         CalculateTriggerCollider();
+        SetThunderPosition();
+    }
+
+    // ---------------------- SFX, VFX, and Player Indicator ----------------------
+
+    private void SetThunderPosition()
+    {
+        Debug.Log("Setting Thunder");
+        float height = GetStackHeight();
+        Debug.Log(height);
+        thunder.transform.localPosition = new Vector3(0, height + 0.5f, 0);
+        Debug.Log(thunder.transform.localPosition);
+        #if UNITY_EDITOR
+        UnityEditor.EditorGUIUtility.PingObject(thunder);
+#endif
+        Debug.Log($"Moving Thunder named '{thunder.name}' on Parent '{transform.name}'");
+    }
+
+    private void SpawnVFX(GameObject prefab, Vector3 position, Transform parent)
+    {
+        if (prefab == null) return;
+
+        GameObject vfxInstance = Instantiate(prefab, position, Quaternion.identity, parent);
+
+        Destroy(vfxInstance, 0.5f);
     }
 
     // ---------------------- IControllable Implementation ----------------------
@@ -219,6 +264,9 @@ public class NewStackController : MonoBehaviour, IControllable
         {
             runnerMovement.enabled = true;
         }
+
+        SetThunderPosition();
+        if(thunder != null) thunder.SetActive(true);
     }
 
     void IControllable.DeactivateControl()
@@ -226,5 +274,6 @@ public class NewStackController : MonoBehaviour, IControllable
         jumperMovement.enabled = false;
         flyerMovement.enabled = false;
         runnerMovement.enabled = false;
+        if(thunder != null) thunder.SetActive(false);
     } 
 }
