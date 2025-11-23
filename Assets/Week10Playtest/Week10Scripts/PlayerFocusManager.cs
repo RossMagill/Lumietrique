@@ -61,8 +61,7 @@ public class PlayerFocusManager : MonoBehaviour
         }
 
         controllables.Remove(target);
-
-        Debug.Log($"new focus index: {controllables.IndexOf(newFocus)}");
+        
         SetFocus(newFocus);
     }
 
@@ -92,24 +91,11 @@ public class PlayerFocusManager : MonoBehaviour
             return;
         }
 
-        // RobotController robotController = currentFocus.GetComponent<RobotController>();
-
-        // if (robotController != null && !currentFocus.GetComponent<StackController>())
-        // {
-        //     GameObject previousFocus = currentFocus;
-        //     robotController.TryRejoin();
-
-        //     if (previousFocus != currentFocus)
-        //     {
-        //         return;
-        //     }
-        // }
-
         NewStackController stackController = currentFocus.GetComponent<NewStackController>();
 
         if (stackController != null)
         {
-            stackController.HandleStackInputLogic();
+            stackController.TryRejoinOrPop();
         }
     }
 
@@ -129,7 +115,5 @@ public class PlayerFocusManager : MonoBehaviour
                 SetFocus(controllables[currentFocusIndex]);
             }
         }
-        
-        // Debug.Log($"Current Focus: {currentFocus}, Index: {currentFocusIndex}");
     }
 }

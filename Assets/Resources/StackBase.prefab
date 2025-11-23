@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6559104928020353545}
   - component: {fileID: 2771136983978681428}
   - component: {fileID: 5687800769834387940}
+  - component: {fileID: 5912219310178639676}
   - component: {fileID: 4117485573791375780}
   - component: {fileID: 6232127881595107144}
   - component: {fileID: 1841645204948924506}
@@ -67,6 +68,27 @@ BoxCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &5912219310178639676
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6388971268474389326}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -163,7 +185,7 @@ MonoBehaviour:
   jumpForce: 8
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   groundCheckDistance: 0.1
   ascendGravityMultiplier: 1.8
   fallGravityMultiplier: 3.2
