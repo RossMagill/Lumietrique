@@ -14,6 +14,10 @@ public class NewStackController : MonoBehaviour, IControllable
     [Header("Visual Effects")]
     [SerializeField] private GameObject stackConnectVFX; 
     [SerializeField] private GameObject stackPopVFX;
+    [SerializeField] private GameObject landVFX;
+
+    private float minLandVelocity = 2.0f; 
+    private float lastLandTime = 0f;
 
     private GameObject stackBasePrefab;
 
@@ -73,41 +77,24 @@ public class NewStackController : MonoBehaviour, IControllable
 
     // ---------------------- Collider Logic ----------------------
 
-    // private void CalculateCollider()
-    // {
-    //     float height = GetStackHeight();
-    //     float offset = stack[0].transform.localScale.y / 2f;
-    //     physicsCollider.center = new Vector3(0f, (height / 2f) - offset, 0);
-    //     physicsCollider.size = new Vector3(2f, height, 0.2f);
-    // }
-
     private void CalculateCollider()
     {
         if (stack.Count == 0) return;
 
-        // 1. Find the Bottom Marker (Feet of the first robot)
         RobotStackInfo bottomInfo = stack[0].GetComponent<RobotStackInfo>();
         if (bottomInfo == null || bottomInfo.feetPoint == null) return;
 
-        // 2. Find the Top Marker (Head of the last robot)
         RobotStackInfo topInfo = stack[stack.Count - 1].GetComponent<RobotStackInfo>();
         if (topInfo == null || topInfo.headPoint == null) return;
 
-        // 3. Convert both to Local Space of the Stack Controller
-        // (Use local Y because that's the up/down axis)
         float bottomY = this.transform.InverseTransformPoint(bottomInfo.feetPoint.position).y;
         float topY = this.transform.InverseTransformPoint(topInfo.headPoint.position).y;
 
-        // 4. Calculate Height and Center
         float totalHeight = Mathf.Abs(topY - bottomY);
         float centerY = bottomY + (totalHeight / 2f);
 
-        // 5. Apply to Physics Collider
         physicsCollider.center = new Vector3(0f, centerY, 0f);
         physicsCollider.size = new Vector3(2f, totalHeight, 0.2f); // Width (2f) might need adjusting based on mesh
-        
-        // 6. Update Trigger Collider (using the same math)
-        //CalculateTriggerCollider(centerY, totalHeight);
     }
 
     private void CalculateTriggerCollider()
@@ -154,6 +141,25 @@ public class NewStackController : MonoBehaviour, IControllable
         if (targetStack != null && potentialTargets.Contains(targetStack))
         {
             potentialTargets.Remove(targetStack);
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (Time.time < lastLandTime + 0.1f) return;
+
+        if (collision.relativeVelocity.magnitude > minLandVelocity)
+        {
+            ContactPoint contact = collision.contacts[0];
+            
+            if (contact.normal.y > 0.5f)
+            {
+                Vector3 landPos = new Vector3(this.transform.position.x, contact.point.y, this.transform.position.z);
+                
+                SpawnVFX(landVFX, landPos, null); 
+                
+                lastLandTime = Time.time;
+            }
         }
     }
 
@@ -289,13 +295,32 @@ public class NewStackController : MonoBehaviour, IControllable
         #endif
     }
 
+    // private void SpawnVFX(GameObject prefab, Vector3 position, Transform parent)
+    // {
+    //     if (prefab == null) return;
+
+    //     GameObject vfxInstance = Instantiate(prefab, position, Quaternion.identity, parent);
+
+    //     Destroy(vfxInstance, 0.5f);
+    // }
+
     private void SpawnVFX(GameObject prefab, Vector3 position, Transform parent)
     {
         if (prefab == null) return;
 
-        GameObject vfxInstance = Instantiate(prefab, position, Quaternion.identity, parent);
+        GameObject vfxInstance;
+        
+        if (parent != null)
+        {
+            vfxInstance = Instantiate(prefab, position, Quaternion.identity, parent);
+        }
+        else
+        {
+            vfxInstance = Instantiate(prefab, position, Quaternion.identity);
+            vfxInstance.transform.up = Vector3.up; 
+        }
 
-        Destroy(vfxInstance, 0.5f);
+        Destroy(vfxInstance, 1.0f);
     }
 
     // ---------------------- IControllable Implementation ----------------------

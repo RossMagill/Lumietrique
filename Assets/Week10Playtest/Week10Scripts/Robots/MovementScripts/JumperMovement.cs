@@ -10,9 +10,6 @@ public class JumperMovement : MonoBehaviour, IMovement
     [Header("Input")]
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
-    [SerializeField] private InputActionReference resetAction;
-    [SerializeField] private InputActionReference changeScene;
-
 
     [Header("Movement")]
     public float moveSpeed = 100f;
@@ -25,11 +22,16 @@ public class JumperMovement : MonoBehaviour, IMovement
     public LayerMask groundMask;
     public float groundCheckDistance = 0.1f;
 
+    // --- NEW VFX SECTION ---
+    [Header("VFX")]
+    [SerializeField] private GameObject jumpVFX; // Drag your particle prefab here
+    [SerializeField] private float vfxYOffset = 0.1f; // Lift it slightly so it doesn't clip
+    // -----------------------
+
     [Header("Gravity")]
     public float ascendGravityMultiplier = 1.8f;
     public float fallGravityMultiplier = 3.2f;
     public float lowJumpGravityMultiplier = 4.0f;
-
 
     [Header("Slice Lock")]
     public float sliceZ = 0f;
@@ -54,111 +56,91 @@ public class JumperMovement : MonoBehaviour, IMovement
     {
         moveAction?.action.Enable();
         jumpAction?.action.Enable();
-        resetAction?.action.Enable();
-        changeScene?.action.Enable();
     }
     void OnDisable()
     {
         moveAction?.action.Disable();
         jumpAction?.action.Disable();
-        resetAction?.action.Disable();
-        changeScene?.action.Disable();
     }
 
     void Update()
     {
         if (jumpAction != null && jumpAction.action.WasPressedThisFrame())
             jumpQueued = true;
+    }
 
-        if (resetAction != null && resetAction.action.WasPressedThisFrame())
+    void FixedUpdate()
+    {
+        // Lock to Z-slice
+        var p = rb.position;
+        if (Mathf.Abs(p.z - sliceZ) > 0.0001f)
+            rb.position = new Vector3(p.x, p.y, sliceZ);
+
+        // Horizontal movement
+        float inputX = moveAction ? moveAction.action.ReadValue<float>() : 0f;
+        float targetX = inputX * moveSpeed;
+        float rate = (Mathf.Abs(inputX) > 0.01f) ? acceleration : deceleration;
+        float newX = Mathf.MoveTowards(rb.linearVelocity.x, targetX, rate * Time.fixedDeltaTime);
+        newX = Mathf.Clamp(newX, -maxHorizontalSpeed, maxHorizontalSpeed);
+
+        Vector3 v = rb.linearVelocity;
+        v.x = newX;
+
+        // --- JUMP LOGIC UPDATED ---
+        if (jumpQueued && IsGrounded())
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            v.y = jumpForce;
+            jumpQueued = false;
+            
+            // Trigger the Effect
+            SpawnJumpVFX(); 
         }
-        
-        if (changeScene.action.WasPressedThisFrame())
+        else
         {
-            int curr = SceneManager.GetActiveScene().buildIndex;
-            print(curr);
-            if (curr == 0)
-            {
-                SceneManager.LoadScene("Week8B");
-                return;
-            } else if (curr == 1)
-            {
-                SceneManager.LoadScene("Week8C");
-                return;
-            } else if (curr == 2)
-            {
-                SceneManager.LoadScene("Week8A");
-                return;
-            }
+            jumpQueued = false;
         }
-    }
+        // --------------------------
 
-void FixedUpdate()
-{
-    // Lock to Z-slice (Z = 0)
-    var p = rb.position;
-    if (Mathf.Abs(p.z - sliceZ) > 0.0001f)
-        rb.position = new Vector3(p.x, p.y, sliceZ);
+        float g = Physics.gravity.y; // negative
+        bool rising  = v.y >  0.01f;
+        bool falling = v.y < -0.01f;
+        bool jumpHeld = jumpAction && jumpAction.action.IsPressed();
 
-    // Horizontal movement
-    float inputX = moveAction ? moveAction.action.ReadValue<float>() : 0f;
-    float targetX = inputX * moveSpeed;
-    float rate = (Mathf.Abs(inputX) > 0.01f) ? acceleration : deceleration;
-    float newX = Mathf.MoveTowards(rb.linearVelocity.x, targetX, rate * Time.fixedDeltaTime);
-    newX = Mathf.Clamp(newX, -maxHorizontalSpeed, maxHorizontalSpeed);
-
-    Vector3 v = rb.linearVelocity;
-    v.x = newX;
-
-    if (jumpQueued && IsGrounded())
-    {
-        v.y = jumpForce;
-        jumpQueued = false;
-    }
-    else
-    {
-        jumpQueued = false;
-    }
-
-    float g = Physics.gravity.y; // negative
-
-    // --- CHANGED: use v.y (the up-to-date velocity), not rb.linearVelocity.y
-    bool rising  = v.y >  0.01f;
-    bool falling = v.y < -0.01f;
-
-    bool jumpHeld = jumpAction && jumpAction.action.IsPressed();
-
-    if (falling)
-    {
-        v += Vector3.up * (g * (fallGravityMultiplier - 1f) * Time.fixedDeltaTime);
-    }
-    else if (rising)
-    {
-        float mult = jumpHeld ? ascendGravityMultiplier : lowJumpGravityMultiplier;
-        v += Vector3.up * (g * (mult - 1f) * Time.fixedDeltaTime);
-    }
-
-    // --- CHANGED: cache wallDir and use v.y (current) for the falling check
-    float wallDir = IsWalled();
-    if (wallDir != 0 && !IsGrounded() && v.y < 0f)
-    {
-        if (inputX > 0 && wallDir == 1)
+        if (falling)
         {
-            print("right");
-            v.y = -5f;
+            v += Vector3.up * (g * (fallGravityMultiplier - 1f) * Time.fixedDeltaTime);
         }
-        else if (inputX < 0 && wallDir == -1)
+        else if (rising)
         {
-            print("left");
-            v.y = -5f;
+            float mult = jumpHeld ? ascendGravityMultiplier : lowJumpGravityMultiplier;
+            v += Vector3.up * (g * (mult - 1f) * Time.fixedDeltaTime);
         }
+
+        // Wall Logic
+        float wallDir = IsWalled();
+        if (wallDir != 0 && !IsGrounded() && v.y < 0f)
+        {
+            if (inputX > 0 && wallDir == 1)      v.y = -5f;
+            else if (inputX < 0 && wallDir == -1) v.y = -5f;
+        }
+
+        rb.linearVelocity = v;
     }
 
-    rb.linearVelocity = v;
-}
+    // --- NEW HELPER METHOD ---
+    private void SpawnJumpVFX()
+    {
+        if (jumpVFX == null) return;
+
+        // Calculate bottom center of the collider
+        Vector3 bottomCenter = new Vector3(box.bounds.center.x, box.bounds.min.y, box.bounds.center.z);
+        Vector3 spawnPos = bottomCenter + new Vector3(0, vfxYOffset, 0);
+
+        // Spawn with default rotation (Cloud puffs usually don't need rotation)
+        GameObject vfx = Instantiate(jumpVFX, spawnPos, Quaternion.identity);
+        Destroy(vfx, 2.0f);
+    }
+    // -------------------------
 
     bool IsGrounded()
     {
@@ -169,7 +151,7 @@ void FixedUpdate()
 
         Vector3[] offsets =
         {
-            new( 0f, 0f,  0f), // center
+            new( 0f, 0f,  0f), 
             new( b.extents.x - inset, 0f,  0f),
             new(-b.extents.x + inset, 0f,  0f),
             new( 0f, 0f,  b.extents.z - inset),
@@ -192,24 +174,14 @@ void FixedUpdate()
     float IsWalled()
     {
         Vector3 origin = box.bounds.center;
-
         float distance = box.bounds.extents.x + groundCheckDistance;
 
         bool leftWall = Physics.Raycast(origin, Vector3.left, distance, groundMask, QueryTriggerInteraction.Ignore);
         bool rightWall = Physics.Raycast(origin, Vector3.right, distance, groundMask, QueryTriggerInteraction.Ignore);
 
-        if (leftWall && !rightWall)
-        {
-            return -1;
-        }
-        else if (rightWall && !leftWall)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
+        if (leftWall && !rightWall) return -1;
+        else if (rightWall && !leftWall) return 1;
+        else return 0;
     }
 
     public void EnableMovement() { enabled = true; }

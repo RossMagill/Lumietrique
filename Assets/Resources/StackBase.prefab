@@ -88,6 +88,7 @@ MonoBehaviour:
   thunder: {fileID: 977903961454921613}
   stackConnectVFX: {fileID: 7834434380170384362, guid: 68101499d07aced4aa0ded4acb624942, type: 3}
   stackPopVFX: {fileID: 7834434380170384362, guid: 68101499d07aced4aa0ded4acb624942, type: 3}
+  landVFX: {fileID: 5988538361188982963, guid: 1b0831d4d161ea441bc59d675ca857c5, type: 3}
 --- !u!65 &5687800769834387940
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -212,17 +213,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::JumperMovement
   moveAction: {fileID: 3793901249440415446, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   jumpAction: {fileID: 8989076675838846023, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  resetAction: {fileID: -7118720724824300909, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  changeScene: {fileID: 5841437899163526410, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   moveSpeed: 100
   acceleration: 50
   deceleration: 60
   maxHorizontalSpeed: 30
-  jumpForce: 8
+  jumpForce: 12
   groundMask:
     serializedVersion: 2
     m_Bits: 8
   groundCheckDistance: 0.1
+  jumpVFX: {fileID: 3531371342157543700, guid: 8fc56561726d2144aa2703413241ffe0, type: 3}
+  vfxYOffset: 0.1
   ascendGravityMultiplier: 1.8
   fallGravityMultiplier: 3.2
   lowJumpGravityMultiplier: 4
@@ -240,15 +241,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunnerMovement
   moveAction: {fileID: 3793901249440415446, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  resetAction: {fileID: -7118720724824300909, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  changeScene: {fileID: 5841437899163526410, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  dashAction: {fileID: 8989076675838846023, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   moveSpeed: 100
   acceleration: 50
   deceleration: 60
   maxHorizontalSpeed: 30
+  dashSpeed: 60
+  dashDuration: 0.2
+  dashCooldown: 1
+  canAirDash: 1
+  dashDustVFX: {fileID: 695659118722961963, guid: dd99efc64c8808c42b2c4808539a4bd5, type: 3}
+  vfxYOffset: 0.1
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   groundCheckDistance: 0.1
   ascendGravityMultiplier: 1.8
   fallGravityMultiplier: 3.2
@@ -266,6 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUtilities
   sliceZ: 0
+  resetAction: {fileID: -7118720724824300909, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!1001 &1799327210724698505
 PrefabInstance:
   m_ObjectHideFlags: 0
