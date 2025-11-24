@@ -73,12 +73,41 @@ public class NewStackController : MonoBehaviour, IControllable
 
     // ---------------------- Collider Logic ----------------------
 
+    // private void CalculateCollider()
+    // {
+    //     float height = GetStackHeight();
+    //     float offset = stack[0].transform.localScale.y / 2f;
+    //     physicsCollider.center = new Vector3(0f, (height / 2f) - offset, 0);
+    //     physicsCollider.size = new Vector3(2f, height, 0.2f);
+    // }
+
     private void CalculateCollider()
     {
-        float height = GetStackHeight();
-        float offset = stack[0].transform.localScale.y / 2f;
-        physicsCollider.center = new Vector3(0f, (height / 2f) - offset, 0);
-        physicsCollider.size = new Vector3(2f, height, 0.2f);
+        if (stack.Count == 0) return;
+
+        // 1. Find the Bottom Marker (Feet of the first robot)
+        RobotStackInfo bottomInfo = stack[0].GetComponent<RobotStackInfo>();
+        if (bottomInfo == null || bottomInfo.feetPoint == null) return;
+
+        // 2. Find the Top Marker (Head of the last robot)
+        RobotStackInfo topInfo = stack[stack.Count - 1].GetComponent<RobotStackInfo>();
+        if (topInfo == null || topInfo.headPoint == null) return;
+
+        // 3. Convert both to Local Space of the Stack Controller
+        // (Use local Y because that's the up/down axis)
+        float bottomY = this.transform.InverseTransformPoint(bottomInfo.feetPoint.position).y;
+        float topY = this.transform.InverseTransformPoint(topInfo.headPoint.position).y;
+
+        // 4. Calculate Height and Center
+        float totalHeight = Mathf.Abs(topY - bottomY);
+        float centerY = bottomY + (totalHeight / 2f);
+
+        // 5. Apply to Physics Collider
+        physicsCollider.center = new Vector3(0f, centerY, 0f);
+        physicsCollider.size = new Vector3(2f, totalHeight, 0.2f); // Width (2f) might need adjusting based on mesh
+        
+        // 6. Update Trigger Collider (using the same math)
+        //CalculateTriggerCollider(centerY, totalHeight);
     }
 
     private void CalculateTriggerCollider()
@@ -192,26 +221,34 @@ public class NewStackController : MonoBehaviour, IControllable
 
     public void RegisterRobotToStack(GameObject robot)
     {
-        // float baseHeight = GetStackHeight();
-        //float robotHeight = robot.transform.localScale.y;
-
         robot.transform.SetParent(this.transform);
+
+        RobotStackInfo newRobotInfo = robot.GetComponent<RobotStackInfo>();
         
         if (stack.Count == 0)
         {
             robot.transform.localPosition = Vector3.zero;        
-        } else
+        } 
+        else
         {
             GameObject previousRobot = stack[stack.Count - 1];
 
-            float prevY = previousRobot.transform.localPosition.y;
-            float prevHalfHeight = previousRobot.transform.localScale.y / 2f;
-            float newHalfHeight = robot.transform.localScale.y / 2f;
+            RobotStackInfo prevInfo = previousRobot.GetComponent<RobotStackInfo>();
 
-            robot.transform.localPosition = new Vector3(0, prevY + prevHalfHeight + newHalfHeight, 0);
+            if (prevInfo != null 
+                && prevInfo.feetPoint != null 
+                && prevInfo.headPoint != null 
+                && newRobotInfo != null)
+            {
+                Vector3 gap = prevInfo.headPoint.position - newRobotInfo.feetPoint.position;
+                robot.transform.position += gap;
+            }
+            else
+            {
+                Debug.Log("Cannot find headpoint/feetpoint");
+            }
 
-            Vector3 contactPoint = robot.transform.position - (robot.transform.up * newHalfHeight);
-            SpawnVFX(stackConnectVFX, contactPoint, this.transform);
+            SpawnVFX(stackConnectVFX, robot.transform.position, this.transform);
         }
 
         stack.Add(robot);
@@ -224,15 +261,32 @@ public class NewStackController : MonoBehaviour, IControllable
 
     private void SetThunderPosition()
     {
-        Debug.Log("Setting Thunder");
-        float height = GetStackHeight();
-        Debug.Log(height);
-        thunder.transform.localPosition = new Vector3(0, height + 0.5f, 0);
-        Debug.Log(thunder.transform.localPosition);
+        if (thunder == null) return;
+
+        if (stack.Count > 0)
+        {
+            GameObject topRobot = stack[stack.Count - 1];
+            RobotStackInfo topInfo = topRobot.GetComponent<RobotStackInfo>();
+
+            if (topInfo != null && topInfo.headPoint != null)
+            {
+                Vector3 headWorldPos = topInfo.headPoint.position;
+                thunder.transform.position = headWorldPos + (Vector3.up * 1f);
+            }
+            else
+            {
+                float estimatedTop = topRobot.transform.position.y + (topRobot.transform.localScale.y / 2f);
+                thunder.transform.position = new Vector3(topRobot.transform.position.x, estimatedTop + 0.5f, topRobot.transform.position.z);
+            }
+        }
+        else
+        {
+            thunder.transform.localPosition = new Vector3(0, 1.0f, 0);
+        }
+
         #if UNITY_EDITOR
-        UnityEditor.EditorGUIUtility.PingObject(thunder);
-#endif
-        Debug.Log($"Moving Thunder named '{thunder.name}' on Parent '{transform.name}'");
+        // UnityEditor.EditorGUIUtility.PingObject(thunder); 
+        #endif
     }
 
     private void SpawnVFX(GameObject prefab, Vector3 position, Transform parent)
