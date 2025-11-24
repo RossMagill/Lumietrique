@@ -3,7 +3,42 @@ guid: 78b24a25df64548eab71e32cfab8a00d
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: character00
+    second: {fileID: 2100000, guid: 6cdd2d5ab34e5454ba6c35bfdaaf9af6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: lambert59
+    second: {fileID: 2100000, guid: a9a1c3b3f085d487c9432fe62c72b3d9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: level01_background
+    second: {fileID: 2100000, guid: 186e687e1ba1046a3afb5f540f7a87d9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: level01_ground
+    second: {fileID: 2100000, guid: 5343846e68fc04e298a84224686e4621, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: level01_ground01
+    second: {fileID: 2100000, guid: 67e9122cdd0cf453bb03e1d9af27e832, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: level01_mechanic
+    second: {fileID: 2100000, guid: dff6e1304e3244d228a464aed503d1d0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: level01_platform
+    second: {fileID: 2100000, guid: ac9b95926a93648cc83bd858a58a8e0d, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

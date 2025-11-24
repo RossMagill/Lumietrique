@@ -52,7 +52,7 @@ GameObject:
   - component: {fileID: 3430469328615319361}
   m_Layer: 3
   m_Name: StackBase
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -180,6 +180,8 @@ MonoBehaviour:
   verticalSpeed: 20
   acceleration: 60
   deceleration: 70
+  ascendVFX: {fileID: 6278336298599244336, guid: 16ff53ba3019ad1409f331a46e8e6938, type: 3}
+  vfxYOffset: 0
   visualModel: {fileID: 0}
   bankAngle: 15
   bankSmoothing: 8
@@ -231,7 +233,7 @@ MonoBehaviour:
   acceleration: 50
   deceleration: 60
   maxHorizontalSpeed: 30
-  dashSpeed: 60
+  dashSpeed: 25
   dashDuration: 0.2
   dashCooldown: 1
   canAirDash: 1

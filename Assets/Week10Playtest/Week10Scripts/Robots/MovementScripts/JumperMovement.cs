@@ -40,6 +40,8 @@ public class JumperMovement : MonoBehaviour, IMovement
     private BoxCollider box;
     private bool jumpQueued;
 
+    [HideInInspector] public Vector3 platformVelocity; 
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -124,7 +126,7 @@ public class JumperMovement : MonoBehaviour, IMovement
             else if (inputX < 0 && wallDir == -1) v.y = -5f;
         }
 
-        rb.linearVelocity = v;
+        rb.linearVelocity = v + platformVelocity;
     }
 
     // --- NEW HELPER METHOD ---

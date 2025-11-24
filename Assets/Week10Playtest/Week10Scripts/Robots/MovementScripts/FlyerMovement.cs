@@ -200,6 +200,10 @@ public class FlyerMovement : MonoBehaviour, IMovement
     public float acceleration = 50f;
     public float deceleration = 60f;
 
+    [Header("VFX")]
+    [SerializeField] private GameObject ascendVFX; 
+    [SerializeField] private float vfxYOffset = 0f;
+    
     [Header("Visuals (Optional)")]
     [Tooltip("Assign the mesh child here to make it tilt when moving")]
     public Transform visualModel; 
@@ -210,10 +214,12 @@ public class FlyerMovement : MonoBehaviour, IMovement
     public float sliceZ = 0f;
 
     private Rigidbody rb;
+    private RobotStackInfo stackInfo;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        stackInfo = GetComponent<RobotStackInfo>();
 
         // Standard 2.5D constraints
         rb.constraints = RigidbodyConstraints.FreezePositionZ |
@@ -238,6 +244,19 @@ public class FlyerMovement : MonoBehaviour, IMovement
         moveAction?.action.Disable();
         ascendAction?.action.Disable();
         descendAction?.action.Disable();
+    }
+
+    void Update()
+    {
+        if (ascendAction != null && ascendAction.action.WasPressedThisFrame())
+        {
+            SpawnAscendVFX();
+        }
+
+        if (descendAction != null && descendAction.action.WasPressedThisFrame())
+        {
+            SpawnDescendVFX();
+        }
     }
 
     void FixedUpdate()
@@ -281,6 +300,57 @@ public class FlyerMovement : MonoBehaviour, IMovement
             Quaternion targetRot = Quaternion.Euler(0, 0, lean);
             visualModel.localRotation = Quaternion.Slerp(visualModel.localRotation, targetRot, bankSmoothing * Time.fixedDeltaTime);
         }
+    }
+
+    private void SpawnAscendVFX()
+    {
+        if (ascendVFX == null) return;
+
+        Vector3 spawnPos;
+
+        // 1. Try to use the explicit FeetPoint from our stack logic (Most Accurate)
+        if (stackInfo != null && stackInfo.feetPoint != null)
+        {
+            spawnPos = stackInfo.feetPoint.position;
+        }
+        // 2. Fallback: If no script, try to guess based on Transform
+        else
+        {
+            // Guess that feet are roughly 0.5 units down if scale is 1
+            spawnPos = transform.position - (Vector3.up * 0.5f * transform.localScale.y);
+        }
+
+        // Apply the optional offset (usually 0 now, but good to have just in case)
+        spawnPos += new Vector3(0, vfxYOffset, 0);
+
+        Quaternion rotation = Quaternion.Euler(0, 0, 180f);
+
+        GameObject vfx = Instantiate(ascendVFX, spawnPos, rotation);
+        Destroy(vfx, 2.0f);
+    }
+
+    private void SpawnDescendVFX()
+    {
+        if (ascendVFX == null) return;
+
+        Vector3 spawnPos;
+
+        // B. Try HEAD point
+        if (stackInfo != null && stackInfo.headPoint != null)
+        {
+            spawnPos = stackInfo.headPoint.position;
+        }
+        else
+        {
+            // Guess Top
+            spawnPos = transform.position + (Vector3.up * 0.5f * transform.localScale.y);
+        }
+
+        // Apply Offset (Inverted for top - move UP away from mesh)
+        spawnPos -= new Vector3(0, vfxYOffset, 0);
+
+        GameObject vfx = Instantiate(ascendVFX, spawnPos, Quaternion.identity);
+        Destroy(vfx, 2.0f);
     }
 
     public void EnableMovement() { enabled = true; }
