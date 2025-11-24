@@ -1693,6 +1693,10 @@ PrefabInstance:
       propertyPath: 'stack.Array.data[2]'
       value: 
       objectReference: {fileID: 7158221865864591113}
+    - target: {fileID: 5439232536776607221, guid: 3c2a860e72f794595a30387b70d5ae65, type: 3}
+      propertyPath: m_CastShadows
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6388971268474389326, guid: 3c2a860e72f794595a30387b70d5ae65, type: 3}
       propertyPath: m_Name
       value: StackBase (3)
