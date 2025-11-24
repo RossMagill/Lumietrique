@@ -1,14 +1,10 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(Rigidbody))]
 public class GameUtilities : MonoBehaviour
 {
     [Header("Slice Lock")]
     public float sliceZ = 0f;
-
-    [Header("Input")]
-    [SerializeField] private InputActionReference resetAction;
 
     private Rigidbody rb;  
 
@@ -16,29 +12,13 @@ public class GameUtilities : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
     }
-
-    void OnEnable()
-    {
-        resetAction?.action.Enable();
-    }
-
-    void OnDisable()
-    {
-        resetAction?.action.Disable();
-    }
     
     void FixedUpdate()
     {
-        var p = rb.position;
-        if (Mathf.Abs(p.z - sliceZ) > 0.0001f)
-            rb.position = new Vector3(p.x, p.y, sliceZ);
-    }
-
-    void Update()
-    {
-        if (resetAction != null && resetAction.action.WasPressedThisFrame())
+        // Purely physics. No Input. Safe to destroy.
+        if (Mathf.Abs(rb.position.z - sliceZ) > 0.0001f)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            rb.position = new Vector3(rb.position.x, rb.position.y, sliceZ);
         }
     }
 }

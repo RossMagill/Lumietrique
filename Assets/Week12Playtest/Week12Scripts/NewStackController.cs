@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 
 public class NewStackController : MonoBehaviour, IControllable
 {
@@ -18,6 +19,12 @@ public class NewStackController : MonoBehaviour, IControllable
 
     private float minLandVelocity = 2.0f; 
     private float lastLandTime = 0f;
+
+    [Header("Camera Shake")]
+    [SerializeField] private float stackShakeForce = 0.5f; 
+    [SerializeField] private float popShakeForce = 1.0f;
+
+    private CinemachineImpulseSource impulseSource;
 
     private GameObject stackBasePrefab;
 
@@ -194,6 +201,12 @@ public class NewStackController : MonoBehaviour, IControllable
             Vector3 feetPosition = topRobot.transform.position - (topRobot.transform.up * halfHeight);
             
             SpawnVFX(stackPopVFX, feetPosition, this.transform);
+            if (impulseSource != null)
+            {
+                // GenerateImpulse(Vector3 velocity) - giving it a downward kick feel
+                Debug.Log("Reached");
+                impulseSource.GenerateImpulse(Vector3.down * popShakeForce);
+            }
             GameObject newStackBase = Instantiate(stackBasePrefab, topRobot.transform.position, Quaternion.identity);
             stack.RemoveAt(stack.Count - 1);
             CalculateCollider();
@@ -255,6 +268,11 @@ public class NewStackController : MonoBehaviour, IControllable
             }
 
             SpawnVFX(stackConnectVFX, robot.transform.position, this.transform);
+            if (stack.Count > 1 && impulseSource != null)
+            {
+                // Random direction makes it feel more organic
+                impulseSource.GenerateImpulse(Random.insideUnitSphere * stackShakeForce);
+            }
         }
 
         stack.Add(robot);
