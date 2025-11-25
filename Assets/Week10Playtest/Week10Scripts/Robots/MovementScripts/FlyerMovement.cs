@@ -203,6 +203,14 @@ public class FlyerMovement : MonoBehaviour, IMovement
     [Header("VFX")]
     [SerializeField] private GameObject ascendVFX; 
     [SerializeField] private float vfxYOffset = 0f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip ascendSFX;
+    [Range(0f, 1f)] [SerializeField] private float ascendVolume = 1.0f;
+    [SerializeField] private AudioClip descendSFX;
+    [Range(0f, 1f)] [SerializeField] private float descendVolume = 1.0f;
+
+    private AudioSource audioSource;
     
     [Header("Visuals (Optional)")]
     [Tooltip("Assign the mesh child here to make it tilt when moving")]
@@ -227,7 +235,9 @@ public class FlyerMovement : MonoBehaviour, IMovement
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-        
+
+        audioSource = GetComponent<AudioSource>();
+
         // CRITICAL: Flyers ignore gravity so they hover when you let go
         rb.useGravity = false; 
     }
@@ -251,11 +261,13 @@ public class FlyerMovement : MonoBehaviour, IMovement
         if (ascendAction != null && ascendAction.action.WasPressedThisFrame())
         {
             SpawnAscendVFX();
+            if (ascendSFX && audioSource) audioSource.PlayOneShot(ascendSFX, ascendVolume);
         }
 
         if (descendAction != null && descendAction.action.WasPressedThisFrame())
         {
             SpawnDescendVFX();
+            if (descendSFX && audioSource) audioSource.PlayOneShot(descendSFX, descendVolume);
         }
     }
 

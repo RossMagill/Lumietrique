@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using RangeAttribute = UnityEngine.RangeAttribute;
 
 [RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public class JumperMovement : MonoBehaviour, IMovement
@@ -22,16 +23,22 @@ public class JumperMovement : MonoBehaviour, IMovement
     public LayerMask groundMask;
     public float groundCheckDistance = 0.1f;
 
+    [Header("Gravity")]
+    public float ascendGravityMultiplier = 1.8f;
+    public float fallGravityMultiplier = 3.2f;
+    public float lowJumpGravityMultiplier = 4.0f;
+
     // --- NEW VFX SECTION ---
     [Header("VFX")]
     [SerializeField] private GameObject jumpVFX; // Drag your particle prefab here
     [SerializeField] private float vfxYOffset = 0.1f; // Lift it slightly so it doesn't clip
     // -----------------------
 
-    [Header("Gravity")]
-    public float ascendGravityMultiplier = 1.8f;
-    public float fallGravityMultiplier = 3.2f;
-    public float lowJumpGravityMultiplier = 4.0f;
+    [Header("Audio")]
+    [SerializeField] private AudioClip jumpSFX;
+    [Range(0f, 1f)] [SerializeField] private float jumpVolume = 1.0f;
+
+    private AudioSource audioSource;
 
     [Header("Slice Lock")]
     public float sliceZ = 0f;
@@ -52,6 +59,7 @@ public class JumperMovement : MonoBehaviour, IMovement
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnEnable()
@@ -96,6 +104,7 @@ public class JumperMovement : MonoBehaviour, IMovement
             
             // Trigger the Effect
             SpawnJumpVFX(); 
+            if (jumpSFX && audioSource) audioSource.PlayOneShot(jumpSFX, jumpVolume);
         }
         else
         {

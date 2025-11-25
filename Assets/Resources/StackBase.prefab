@@ -50,6 +50,7 @@ GameObject:
   - component: {fileID: 4773630743287515686}
   - component: {fileID: 7628190533619595606}
   - component: {fileID: 3430469328615319361}
+  - component: {fileID: 1495745935198996555}
   m_Layer: 3
   m_Name: StackBase
   m_TagString: Player
@@ -92,6 +93,12 @@ MonoBehaviour:
   landVFX: {fileID: 5988538361188982963, guid: 1b0831d4d161ea441bc59d675ca857c5, type: 3}
   stackShakeForce: 0.5
   popShakeForce: 1
+  stackSFX: {fileID: 8300000, guid: ae4602ab2be51412db337d9bbb814a27, type: 3}
+  stackVolume: 1
+  popSFX: {fileID: 8300000, guid: d3fb24ba950554e72ae82acd9dbf6169, type: 3}
+  popVolume: 1
+  landSFX: {fileID: 8300000, guid: de125349fd395413a8cbae933de079d0, type: 3}
+  landVolume: 0.4
 --- !u!65 &5687800769834387940
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -182,6 +189,10 @@ MonoBehaviour:
   deceleration: 70
   ascendVFX: {fileID: 6278336298599244336, guid: 16ff53ba3019ad1409f331a46e8e6938, type: 3}
   vfxYOffset: 0
+  ascendSFX: {fileID: 8300000, guid: 0ffd37bd18296443a99918daeae6f01e, type: 3}
+  ascendVolume: 0.4
+  descendSFX: {fileID: 8300000, guid: 299e720d8d01b4245a9b14a7d91a3cdb, type: 3}
+  descendVolume: 0.4
   visualModel: {fileID: 0}
   bankAngle: 15
   bankSmoothing: 8
@@ -209,12 +220,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   groundCheckDistance: 0.1
-  jumpVFX: {fileID: 3531371342157543700, guid: 8fc56561726d2144aa2703413241ffe0, type: 3}
-  vfxYOffset: 0.1
   ascendGravityMultiplier: 1.8
   fallGravityMultiplier: 3.2
   lowJumpGravityMultiplier: 4
+  jumpVFX: {fileID: 3531371342157543700, guid: 8fc56561726d2144aa2703413241ffe0, type: 3}
+  vfxYOffset: 0.1
+  jumpSFX: {fileID: 8300000, guid: e528e6cf6260147ecb4d56a76461a1bb, type: 3}
+  jumpVolume: 0.4
   sliceZ: 0
+  platformVelocity: {x: 0, y: 0, z: 0}
 --- !u!114 &4773630743287515686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,12 +247,14 @@ MonoBehaviour:
   acceleration: 50
   deceleration: 60
   maxHorizontalSpeed: 30
-  dashSpeed: 25
+  dashSpeed: 45
   dashDuration: 0.2
   dashCooldown: 1
   canAirDash: 1
   dashDustVFX: {fileID: 695659118722961963, guid: dd99efc64c8808c42b2c4808539a4bd5, type: 3}
   vfxYOffset: 0.1
+  dashSFX: {fileID: 8300000, guid: b03178f40675a4c0da00bf0986a6bc74, type: 3}
+  dashVolume: 0.4
   groundMask:
     serializedVersion: 2
     m_Bits: 8
@@ -312,6 +328,103 @@ MonoBehaviour:
     DissipationDistance: 100
     PropagationSpeed: 343
   DefaultVelocity: {x: 0, y: -1, z: 0}
+--- !u!82 &1495745935198996555
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6388971268474389326}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &1799327210724698505
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using RangeAttribute = UnityEngine.RangeAttribute;
 
 [RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public class RunnerMovement : MonoBehaviour, IMovement
@@ -29,6 +30,12 @@ public class RunnerMovement : MonoBehaviour, IMovement
     [Tooltip("Slight upward offset so dust doesn't clip into the floor")]
     [SerializeField] private float vfxYOffset = 0.1f;
     // --------------------
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip dashSFX;
+    [Range(0f, 1f)] [SerializeField] private float dashVolume = 1.0f;
+
+    private AudioSource audioSource;
 
     [Header("Grounding / Rays")]
     public LayerMask groundMask;
@@ -59,6 +66,7 @@ public class RunnerMovement : MonoBehaviour, IMovement
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnEnable()
@@ -144,8 +152,9 @@ public class RunnerMovement : MonoBehaviour, IMovement
         isDashing = true;
         lastDashTime = Time.time;
         
-        // --- TRIGGER VFX ---
+        // --- TRIGGER VFX & SFX ---
         SpawnDashVFX();
+        if (dashSFX && audioSource) audioSource.PlayOneShot(dashSFX, dashVolume);
         // -------------------
 
         yield return new WaitForSeconds(dashDuration);

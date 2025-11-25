@@ -17,12 +17,24 @@ public class NewStackController : MonoBehaviour, IControllable
     [SerializeField] private GameObject stackPopVFX;
     [SerializeField] private GameObject landVFX;
 
+    private AudioSource audioSource;
+
     private float minLandVelocity = 2.0f; 
     private float lastLandTime = 0f;
 
     [Header("Camera Shake")]
     [SerializeField] private float stackShakeForce = 0.5f; 
     [SerializeField] private float popShakeForce = 1.0f;
+
+    [Header("Audio Effects")]
+    [SerializeField] private AudioClip stackSFX;
+    [Range(0f, 1f)] [SerializeField] private float stackVolume = 1.0f;
+
+    [SerializeField] private AudioClip popSFX;
+    [Range(0f, 1f)] [SerializeField] private float popVolume = 1.0f;   
+
+    [SerializeField] private AudioClip landSFX;
+    [Range(0f, 1f)] [SerializeField] private float landVolume = 0.5f;
 
     private CinemachineImpulseSource impulseSource;
 
@@ -69,6 +81,7 @@ public class NewStackController : MonoBehaviour, IControllable
         runnerMovement = GetComponent<RunnerMovement>();
 
         if (thunder != null) thunder.SetActive(false);
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -164,7 +177,9 @@ public class NewStackController : MonoBehaviour, IControllable
                 Vector3 landPos = new Vector3(this.transform.position.x, contact.point.y, this.transform.position.z);
                 
                 SpawnVFX(landVFX, landPos, null); 
-                
+
+                if (landSFX && audioSource) audioSource.PlayOneShot(landSFX, landVolume);
+
                 lastLandTime = Time.time;
             }
         }
@@ -200,6 +215,8 @@ public class NewStackController : MonoBehaviour, IControllable
             float halfHeight = topRobot.transform.localScale.y / 2f;
             Vector3 feetPosition = topRobot.transform.position - (topRobot.transform.up * halfHeight);
             
+            if (popSFX && audioSource) audioSource.PlayOneShot(popSFX, popVolume);
+
             SpawnVFX(stackPopVFX, feetPosition, this.transform);
             if (impulseSource != null)
             {
@@ -265,6 +282,13 @@ public class NewStackController : MonoBehaviour, IControllable
             else
             {
                 Debug.Log("Cannot find headpoint/feetpoint");
+            }
+
+            if (stackSFX && audioSource && stack.Count > 0) 
+            {
+                audioSource.pitch = Random.Range(0.9f, 1.1f); 
+                audioSource.PlayOneShot(stackSFX, stackVolume);
+                audioSource.pitch = 1.0f;
             }
 
             SpawnVFX(stackConnectVFX, robot.transform.position, this.transform);
