@@ -190,6 +190,15 @@ public class NewStackController : MonoBehaviour, IControllable
         }
     }
 
+    public void RemovePotentialTarget(NewStackController targetToRemove)
+    {
+        if (potentialTargets.Contains(targetToRemove))
+        {
+            potentialTargets.Remove(targetToRemove);
+            RefreshActionUI();
+        }
+    }
+
     // ---------------------- Stack Management Methods ----------------------
 
     public void TryRejoinOrPop()
@@ -244,6 +253,8 @@ public class NewStackController : MonoBehaviour, IControllable
     public void RejoinTargetStack(GameObject targetStack)    
     {
         NewStackController targetStackController = targetStack.GetComponent<NewStackController>();
+
+        targetStackController.RemovePotentialTarget(this);
 
         List<GameObject> modelsToTransfer = new List<GameObject>(this.stack);
 

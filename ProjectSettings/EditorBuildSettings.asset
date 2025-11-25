@@ -23,12 +23,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Week12Playtest/Week12Scenes/Week12TestScene.unity
     guid: 8a93c1edf710c46a892c2efd146ccf9e
-  - enabled: 1
+  - enabled: 0
     path: Assets/Week12Playtest/Week12Scenes/Week12Robots.unity
     guid: 3cb8f98003823405b90bcae99d2b4a22
   - enabled: 0
     path: Assets/Week12Playtest/Week12Scenes/Week12Level.unity
     guid: 1d7734a8ba67c4805a48f96c0224fbac
+  - enabled: 1
+    path: Assets/Week12Playtest/Finals/Sandbox.unity
+    guid: ae581c5173e6a4c99868ff3207ea0569
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
