@@ -36,6 +36,9 @@ public class NewStackController : MonoBehaviour, IControllable
     [SerializeField] private AudioClip landSFX;
     [Range(0f, 1f)] [SerializeField] private float landVolume = 0.5f;
 
+    // [Header("UI Integration")]
+    // [SerializeField] private PlayerUIManager uiManager; 
+
     private CinemachineImpulseSource impulseSource;
 
     private GameObject stackBasePrefab;
@@ -150,6 +153,7 @@ public class NewStackController : MonoBehaviour, IControllable
             if (!potentialTargets.Contains(targetStack))
             {
                 potentialTargets.Add(targetStack);
+                RefreshActionUI();
             }
         }
     }
@@ -161,6 +165,7 @@ public class NewStackController : MonoBehaviour, IControllable
         if (targetStack != null && potentialTargets.Contains(targetStack))
         {
             potentialTargets.Remove(targetStack);
+            RefreshActionUI();
         }
     }
 
@@ -229,6 +234,7 @@ public class NewStackController : MonoBehaviour, IControllable
             CalculateCollider();
             CalculateTriggerCollider();
             SetThunderPosition();
+            RefreshActionUI();
             NewStackController newStackController = newStackBase.GetComponent<NewStackController>();
             newStackController.RegisterRobotToStack(topRobot);
             playerFocusManager.RegisterControllable(newStackBase);
@@ -305,7 +311,7 @@ public class NewStackController : MonoBehaviour, IControllable
         SetThunderPosition();
     }
 
-    // ---------------------- SFX, VFX, and Player Indicator ----------------------
+    // ---------------------- SFX, VFX, Player Indicator, & UI ----------------------
 
     private void SetThunderPosition()
     {
@@ -365,6 +371,21 @@ public class NewStackController : MonoBehaviour, IControllable
         Destroy(vfxInstance, 1.0f);
     }
 
+    private void RefreshActionUI()
+    {
+        if (thunder != null && !thunder.activeSelf) return;
+
+        potentialTargets.RemoveAll(t => t == null || t.gameObject == null);
+
+        bool targetAvailable = potentialTargets.Count > 0;
+        bool hasStackToPop = stack.Count > 1;
+
+        if (PlayerUIManager.Instance != null)
+        {
+            PlayerUIManager.Instance.UpdateActionUI(targetAvailable, hasStackToPop);
+        }
+    }
+
     // ---------------------- IControllable Implementation ----------------------
 
     void IControllable.ActivateControl()
@@ -373,21 +394,46 @@ public class NewStackController : MonoBehaviour, IControllable
         flyerMovement.enabled = false;
         runnerMovement.enabled = false;
 
+        RobotType activeType = RobotType.Runner;
+
         if (jumperMovement != null && stack[0].name.Contains("Jumper"))
         {
             jumperMovement.enabled = true;
+            activeType = RobotType.Jumper;
         } 
         else if (flyerMovement != null && stack[0].name.Contains("Flyer"))
         {
             flyerMovement.enabled = true;
+            activeType = RobotType.Flyer;
         } 
         else if (runnerMovement != null && stack[0].name.Contains("Runner"))
         {
             runnerMovement.enabled = true;
+            activeType = RobotType.Runner;
+        }
+
+        if (PlayerUIManager.Instance != null)
+        {
+            Debug.Log("REACHED, FOUND IN SCENE");
+            PlayerUIManager.Instance.ShowMovementUI(activeType);
+        }
+        else
+        {
+            PlayerUIManager foundManager = FindAnyObjectByType<PlayerUIManager>();
+            if (foundManager != null)
+            {
+                foundManager.ShowMovementUI(activeType);
+            }
+            else
+            {
+                Debug.LogWarning("No PlayerUIManager found in the scene! UI won't update.");
+            }
         }
 
         SetThunderPosition();
         if(thunder != null) thunder.SetActive(true);
+
+        RefreshActionUI();
     }
 
     void IControllable.DeactivateControl()
