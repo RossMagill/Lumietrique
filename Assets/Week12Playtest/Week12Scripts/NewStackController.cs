@@ -53,6 +53,8 @@ public class NewStackController : MonoBehaviour, IControllable
     private JumperMovement jumperMovement;
     private RunnerMovement runnerMovement;
 
+    public int CurrentStackCount => stack.Count;
+
     // ---------------------- Init Methods ----------------------
 
     private void Awake()
@@ -397,6 +399,17 @@ public class NewStackController : MonoBehaviour, IControllable
         }
     }
 
+    // ---------------------- Cameras ----------------------
+
+    private void UpdateCameraTarget()
+    {
+        CameraTargetController camController = FindAnyObjectByType<CameraTargetController>();
+        if (camController != null)
+        {
+            camController.SetTarget(this.transform);
+        }
+    }
+
     // ---------------------- IControllable Implementation ----------------------
 
     void IControllable.ActivateControl()
@@ -445,6 +458,8 @@ public class NewStackController : MonoBehaviour, IControllable
         if(thunder != null) thunder.SetActive(true);
 
         RefreshActionUI();
+
+        UpdateCameraTarget();
     }
 
     void IControllable.DeactivateControl()

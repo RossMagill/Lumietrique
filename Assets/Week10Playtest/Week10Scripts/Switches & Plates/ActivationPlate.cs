@@ -2,111 +2,116 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 
+public enum PlateOrientation
+{
+    Floor,      // Standard: Moves Down (Local -Y)
+    Ceiling,    // Moves Up (Local +Y)
+    Wall_Front, // Moves Backward (Local -Z)
+    Wall_Back,  // Moves Forward (Local +Z)
+    Wall_Left,  // Moves Right (Local +X)
+    Wall_Right  // Moves Left (Local -X)
+}
+
 public class ActivationPlate : MonoBehaviour
 {
-    [Header("Visual Feedback Settings")]
-    [SerializeField] private float depressedAmount = 0.1f; // How far down it lowers (in Unity units)
-    [SerializeField] private float speed = 5f;             // Speed of the lowering/raising animation
+    [Header("Settings")]
+    [SerializeField] private PlateOrientation orientation = PlateOrientation.Wall_Left; // Dropdown!
+    [SerializeField] private float depressionDistance = 0.15f; 
+    [SerializeField] private float moveSpeed = 5f;
 
     [Header("Events")]
     public UnityEvent OnActivated;
     public UnityEvent OnDeactivated;
 
-    // Internal State
-    private int currentHolders = 0;
-    private List<GameObject> objectsOnPlate = new List<GameObject>(); 
-    private bool isCurrentlyActive = false;
-    private const bool REQUIRE_ROBOT_CONTROLLER = true; 
-    public bool IsActive => isCurrentlyActive;
+    // State
+    private int objectsOnPlateCount = 0;
+    private bool isActive = false;
+    public bool IsActive => isActive;
 
-    // Visual State
-    private Vector3 initialPosition;
-    private Vector3 targetPosition;
+    // Positions
+    private Vector3 restingLocalPos;
+    private Vector3 targetLocalPos;
 
-    private void Start()
+    void Start()
     {
-        initialPosition = transform.position;
-        targetPosition = initialPosition;
+        restingLocalPos = transform.localPosition;
+        targetLocalPos = restingLocalPos;
     }
 
-    private void Update()
+    void Update()
     {
-        // Smoothly move the plate towards the target position (raised or lowered)
-        if (transform.position != targetPosition)
+        // Smooth movement
+        if (Vector3.Distance(transform.localPosition, targetLocalPos) > 0.001f)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * speed);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPos, Time.deltaTime * moveSpeed);
         }
     }
 
-    private void SetTargetPosition(bool depressed)
+    private void UpdateState()
     {
-        if (depressed)
-        {
-            // Calculate the lowered position
-            targetPosition = initialPosition - new Vector3(0, depressedAmount, 0);
-        }
-        else
-        {
-            // Set the target back to the starting position (raised)
-            targetPosition = initialPosition;
-        }
-    }
+        bool shouldBeActive = objectsOnPlateCount > 0;
 
-    private void CheckActivationState()
-    {
-        bool newActiveState = currentHolders > 0;
-        
-        if (newActiveState != isCurrentlyActive)
+        if (shouldBeActive != isActive)
         {
-            isCurrentlyActive = newActiveState;
-            
-            if (isCurrentlyActive)
+            isActive = shouldBeActive;
+            if (isActive)
             {
-                Debug.Log($"Plate {gameObject.name} Activated!");
                 OnActivated.Invoke();
-                SetTargetPosition(true); // <--- LOWER THE PLATE
+                targetLocalPos = GetPressedPosition();
             }
             else
             {
-                Debug.Log($"Plate {gameObject.name} Deactivated!");
                 OnDeactivated.Invoke();
-                SetTargetPosition(false); // <--- RAISE THE PLATE
+                targetLocalPos = restingLocalPos;
             }
         }
     }
-    
-    // OnTriggerEnter and OnTriggerExit remain the same as before:
+
+    private Vector3 GetPressedPosition()
+    {
+        Vector3 offset = Vector3.zero;
+
+        // Determine which way is "In" based on the dropdown
+        switch (orientation)
+        {
+            case PlateOrientation.Floor:      offset = new Vector3(0, -depressionDistance, 0); break;
+            case PlateOrientation.Ceiling:    offset = new Vector3(0, depressionDistance, 0); break;
+            
+            // For walls, you might need to experiment once to see which axis matches your art
+            // Usually:
+            case PlateOrientation.Wall_Left:  offset = new Vector3(depressionDistance, 0, 0); break;  // Moves Right (+X)
+            case PlateOrientation.Wall_Right: offset = new Vector3(-depressionDistance, 0, 0); break; // Moves Left (-X)
+            case PlateOrientation.Wall_Front: offset = new Vector3(0, 0, -depressionDistance); break; // Moves Back (-Z)
+            case PlateOrientation.Wall_Back:  offset = new Vector3(0, 0, depressionDistance); break;  // Moves Forward (+Z)
+        }
+
+        return restingLocalPos + offset;
+    }
+
+    // ---------------------- TRIGGER LOGIC ----------------------
 
     private void OnTriggerEnter(Collider other)
     {
-        if (REQUIRE_ROBOT_CONTROLLER && other.GetComponent<RobotController>() == null)
+        if (IsValidObject(other))
         {
-            return;
-        }
-        GameObject rootObject = other.gameObject.GetComponentInParent<RobotController>()?.gameObject ?? other.gameObject;
-        
-        if (!objectsOnPlate.Contains(rootObject))
-        {
-            objectsOnPlate.Add(rootObject);
-            currentHolders = objectsOnPlate.Count;
-            CheckActivationState();
+            objectsOnPlateCount++;
+            UpdateState();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (REQUIRE_ROBOT_CONTROLLER && other.GetComponent<RobotController>() == null)
+        if (IsValidObject(other))
         {
-            return;
+            objectsOnPlateCount--;
+            if (objectsOnPlateCount < 0) objectsOnPlateCount = 0;
+            UpdateState();
         }
+    }
 
-        GameObject rootObject = other.gameObject.GetComponentInParent<RobotController>()?.gameObject ?? other.gameObject;
-
-        if (objectsOnPlate.Contains(rootObject))
-        {
-            objectsOnPlate.Remove(rootObject);
-            currentHolders = objectsOnPlate.Count;
-            CheckActivationState();
-        }
+    private bool IsValidObject(Collider other)
+    {
+        if (other.isTrigger) return false;
+        return other.CompareTag("Player") || other.GetComponentInParent<NewStackController>();
     }
 }

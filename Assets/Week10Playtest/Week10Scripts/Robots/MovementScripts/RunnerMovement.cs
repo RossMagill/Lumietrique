@@ -23,6 +23,8 @@ public class RunnerMovement : MonoBehaviour, IMovement
     public float dashCooldown = 1.0f;
     public bool canAirDash = true;
 
+    public bool IsDashing => isDashing; 
+
     // --- NEW SECTION ---
     [Header("VFX")]
     [Tooltip("Particle effect for ground dashing (e.g., dust kickup)")]
