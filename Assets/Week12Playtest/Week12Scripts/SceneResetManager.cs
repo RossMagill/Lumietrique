@@ -22,7 +22,7 @@ public class SceneResetManager : MonoBehaviour
     {
         if (resetAction != null && resetAction.action.WasPressedThisFrame())
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            LevelLoader.Instance.ReloadLevel();
         }
     }
 }

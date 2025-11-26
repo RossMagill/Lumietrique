@@ -53,6 +53,8 @@ public class NewStackController : MonoBehaviour, IControllable
     private JumperMovement jumperMovement;
     private RunnerMovement runnerMovement;
 
+    private AudioListener audioListener;
+
     public int CurrentStackCount => stack.Count;
 
     // ---------------------- Init Methods ----------------------
@@ -84,6 +86,7 @@ public class NewStackController : MonoBehaviour, IControllable
         flyerMovement = GetComponent<FlyerMovement>();
         jumperMovement = GetComponent<JumperMovement>();
         runnerMovement = GetComponent<RunnerMovement>();
+        audioListener = GetComponent<AudioListener>();
 
         if (thunder != null) thunder.SetActive(false);
         audioSource = GetComponent<AudioSource>();
@@ -457,6 +460,9 @@ public class NewStackController : MonoBehaviour, IControllable
         SetThunderPosition();
         if(thunder != null) thunder.SetActive(true);
 
+        AudioListener audioListener = GetComponent<AudioListener>();
+        audioListener.enabled = true;
+
         RefreshActionUI();
 
         UpdateCameraTarget();
@@ -468,5 +474,6 @@ public class NewStackController : MonoBehaviour, IControllable
         flyerMovement.enabled = false;
         runnerMovement.enabled = false;
         if(thunder != null) thunder.SetActive(false);
+        audioListener.enabled = false;
     } 
 }

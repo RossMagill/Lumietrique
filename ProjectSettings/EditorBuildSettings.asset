@@ -32,6 +32,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Week12Playtest/Finals/Sandbox.unity
     guid: ae581c5173e6a4c99868ff3207ea0569
+  - enabled: 1
+    path: Assets/Week12Playtest/Finals/Level1.unity
+    guid: 95d981bd145b34cccb27aaf77badc139
+  - enabled: 1
+    path: Assets/Week12Playtest/Finals/Level2.unity
+    guid: dca7b240e08fc4d799886d6a7da4cab8
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

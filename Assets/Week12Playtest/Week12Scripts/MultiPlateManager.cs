@@ -7,6 +7,10 @@ public class MultiPlateManager : MonoBehaviour
     [Tooltip("Drag all the ActivationPlate scripts here that affect this door.")]
     [SerializeField] private List<ActivationPlate> requiredPlates = new List<ActivationPlate>();
 
+    [Header("UI Integration")]
+    [Tooltip("Assign the SimpleDoorUI script here")]
+    [SerializeField] private SimpleDoorUI simpleUI; 
+
     [Tooltip("Drag the object you want to move (e.g., Door or Column)")]
     [SerializeField] private Transform targetObject;
 
@@ -45,6 +49,8 @@ public class MultiPlateManager : MonoBehaviour
                 plate.OnDeactivated.AddListener(CheckAllPlates);
             }
         }
+
+        UpdateUI();
     }
 
     void OnDestroy()
@@ -94,18 +100,27 @@ public class MultiPlateManager : MonoBehaviour
         if (isLockedOpen) return; // Don't close if we already finished
 
         bool allPressed = true;
+        int pressedCount = 0;
 
         // Check every plate in the list
-        foreach (var plate in requiredPlates)
+        for (int i = 0; i < requiredPlates.Count; i++)
         {
-            // We access the public property IsActive on your new ActivationPlate script
-            if (!plate.IsActive)
+            if (requiredPlates[i].IsActive)
+            {
+                pressedCount++;
+                Debug.Log($"Plate {i} is ACTIVE"); // <--- DEBUG
+            }
+            else
             {
                 allPressed = false;
-                break; // One is missing, so fail early
+                Debug.Log($"Plate {i} is INACTIVE"); // <--- DEBUG
             }
         }
 
+        Debug.Log($"Total Pressed: {pressedCount}");
+
+        UpdateUI(pressedCount);
+        
         if (allPressed)
         {
             currentTargetPos = openPos;
@@ -114,5 +129,19 @@ public class MultiPlateManager : MonoBehaviour
         {
             currentTargetPos = closedPos;
         }
+    }
+
+    private void UpdateUI(int count = -1)
+    {
+        if (simpleUI == null) return;
+
+        // If count is -1, calculate manually (for Start)
+        if (count == -1)
+        {
+            count = 0;
+            foreach (var plate in requiredPlates) if (plate.IsActive) count++;
+        }
+
+        simpleUI.UpdateCount(count);
     }
 }
