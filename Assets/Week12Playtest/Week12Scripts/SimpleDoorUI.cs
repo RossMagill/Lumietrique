@@ -17,9 +17,8 @@ public class SimpleDoorUI : MonoBehaviour
     {
         // Hide everything at start (including the elevator message)
         HideAll();
-        
-        // Optional: If you want to show 0/3 at start, call UpdateCount(0) manually here.
-        // UpdateCount(0); 
+
+        countImages[0].SetActive(true);
     }
 
     public void UpdateCount(int currentCount)
